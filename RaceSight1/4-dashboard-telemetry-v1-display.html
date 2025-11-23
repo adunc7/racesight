@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Dashboard - Single Driver</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="/css/4-dashboard-telemetry-single-driver.css" />
+  </head>
+  <body>
+
+
+   <nav class="navbar" role="navigation" aria-label="Main">
+    <div class="nav-brand">Race Sight</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html" id="nav-home">Results</a>
+      <a class="nav-link" href="2-best-10-laps.html" id="nav-about">Best 10</a>
+      <a class="nav-link" href="3-driver-performance.html" id="nav-contact">Driver Endurance</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v1-display.html" id="nav-contact1">Dashboard - Display</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v2-grid.html" id="nav-contact2">Dashboard - Grid</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v3-graphs.html" id="nav-contact3">Dashboard - Graphs </a>
+      <a class="nav-link" href="5-compare-drivers.html" id="nav-contact4">Compare Drivers </a>
+      <a class="nav-link" href="5-compare-races-dashboard.html" id="nav-contact5">Compare Races </a>
+      <a class="nav-link" href="3D.html" id="nav-contact6">3D </a>
+
+    </div>
+  </nav>
+
+  <div id="controls" class = "controlStrip">
+    <label>Select File: <input id="urlInput" placeholder="vehicle_5.json" style="width:260px"/></label>
+    <button id="loadBtn">Load</button>
+
+    <label>Time field:
+      <select id="timeField"><option value="meta_time">meta_time</option><option value="timestamp">timestamp</option></select>
+    </label>
+
+    <label>Lap:
+      <select id="lapSelect"><option value="All">All</option></select>
+    </label>
+
+    <label>Lat:
+      <select id="latName"></select>
+    </label>
+
+    <label>Lon:
+      <select id="lonName"></select>
+    </label>
+
+  <div class="timeBox" aria-live="polite" aria-atomic="true">
+    <div class="label">Time</div>
+    <div id="timeVal" class="value">—</div>
+  </div>
+
+<label><input id="coordsInDegrees" type="checkbox" checked/> Coordinates in degrees</label>
+
+    <div class="controls-right">
+      <button id="playPause">Play</button>
+      <button id="reset">Reset</button>
+      <label>Rate:
+        <select id="rate"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option></select>
+      </label>
+
+      <input id="timeSlider" type="range" min="0" max="0" value="0" style="width:320px"/>
+    </div>
+  </div>
+
+  <div class="topRow" style="display:flex;gap:12px;align-items:stretch;margin-bottom:12px">
+    <div id="heroStrip" style="flex:1 1 0; min-width:0; height:240px; border-radius:8px; background-image:url('car_1.png'); background-size:cover; background-position:center; box-shadow:0 6px 16px rgba(0,0,0,0.12); position:relative; overflow:hidden;">
+      <div style="position:absolute; left:16px; bottom:12px; color:#fff; font-weight:700; font-size:18px; text-shadow:0 2px 6px rgba(0,0,0,0.5)">Telemetry Dashboard</div>
+    </div>
+    <div id="map" style="flex:1 1 0; min-width:0; height:240px; border-radius:8px"></div>
+  </div>
+
+  <div class="headerRow">
+    <div id="welcomeBox" role="status" aria-live="polite">Telemetry Dashboard - View 1</div>
+    <div id="weatherBox" role="status" aria-live="polite">Weather Summary</div>
+  </div>
+
+  <div class="sideBySide">
+    <div class="panelStrip">
+      <div class="panel" aria-live="polite">
+        <div class="stat" style="display:flex;flex-direction:column;align-items:center">
+              <img id="circle" src="Steering_Wheel_.png" alt="wheel"/>
+          <div style="margin-top:8px;text-align:center">
+            <div class="label" style="font-size:13px;color:#ccc">Steering</div>
+            <div id="angleVal" class="value" style="margin-top:6px">—</div>
+          </div>
+        </div>
+
+        <div class="stat" style="min-width:140px">
+          <div class="label">Speed</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div style="display:flex;flex-direction:column;align-items:center">
+              <div class="radial" id="speedRadial" title="Speed">
+                <svg viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="bg" cx="60" cy="60" r="48"></circle>
+                  <circle class="prog" cx="60" cy="60" r="48" stroke-dasharray="0 1000" stroke-dashoffset="0"></circle>
+                </svg>
+                <div class="center"><div id="gearCenter" class="num">—</div><div class="unit">Gear</div></div>
+              </div>
+              <div id="speedText" class="speed-under">— km/h</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat" style="min-width:96px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div class="label">APS</div>
+          <div class="apsWrap" title="APS (throttle)">
+            <div class="apsBar" id="apsBar"><div class="fill"></div></div>
+          </div>
+          <div id="apsPct" class="apsPct">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="weatherWrap" aria-live="polite">
+      <div class="weatherControls">
+        <label style="margin-left:8px">Weather rate:
+          <select id="weatherRate"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option></select>
+        </label>
+      </div>
+      <div id="weatherGrid" role="grid" aria-label="Weather variables"></div>
+    </div>
+  </div>
+
+  <div id="status"></div>
+
+  <script src = "javascript/4-dashboard-telemetry-v1-single-drive.js"> </script>
+  </body>
+</html>

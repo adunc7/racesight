@@ -1,0 +1,94 @@
+ :root{--gap:12px;--box-bg:#ffffff;--box-border:#e6e6e6;--accent:#1f77b4}
+      body{font-family:Arial,Helvetica,sans-serif;margin:12px;background:#ffffff;color:#222}
+
+ /* simple top nav */
+      .navbar {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 20px 20px;
+        background: #000000;
+        color: #fff;
+        border-radius: 6px;
+        margin-bottom: 14px;
+      }
+      .nav-brand { font-size: 20px; font-weight:700; letter-spacing: .4px; }
+      .nav-links { display:flex; gap:12px; margin-left: 12px; }
+      .nav-link {
+        color: #ddd;
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 2px;
+        font-size: 14px;
+      }
+      .nav-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+
+
+      /* control strip styling (dark background for controls) */
+     .controlStrip{
+       background: #000000;;
+       padding:10px;
+       border-radius:8px;
+       display:flex;
+       gap:10px;
+       align-items:center;
+       flex-wrap:wrap;
+       box-shadow:0 6px 18px rgba(0,0,0,0.35);
+     }
+     .controlStrip label{ color:#ddd; }
+     .controlStrip input, .controlStrip select, .controlStrip button{
+       background: rgba(255,255,255,0.06);
+       border: 1px solid rgba(255,255,255,0.12);
+       color:#fff;
+       padding:6px;
+       border-radius:6px;
+     }
+     .controlStrip input::placeholder{ color:#bbb; }
+     .controlStrip .controls-right{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+     .controlStrip button:hover{ filter:brightness(1.06); cursor:pointer; }
+    
+
+
+      
+      #controls{display:flex;gap:8px;align-items:center;margin:12px 0;flex-wrap:wrap}
+      select,input,button{padding:6px;border-radius:6px;border:1px solid #ccc;background:#fff}
+      #map{height:360px;border-radius:10px}
+      #status{margin-top:8px;color:#444}
+
+      /* variable boxes grid */
+      #grid{display:grid;gap:var(--gap);grid-template-columns: repeat(auto-fill,minmax(180px,1fr));align-items:stretch;margin-top:12px}
+      /*.box{background:var(--box-bg);border:1px solid var(--box-border);border-radius:8px;padding:10px;box-shadow:0 1px 2px rgba(0,0,0,0.03);display:flex;flex-direction:column;justify-content:space-between;min-height:72px;transition:transform .12s,box-shadow .12s}
+      .box.updated{transform:scale(1.02);box-shadow:0 6px 18px rgba(31,119,180,0.12)}
+      .box .name{font-size:12px;color:#444;margin-bottom:6px;word-break:break-word}
+      .box .value{font-size:18px;font-weight:700;color:var(--accent);min-height:1em}
+      .box .meta{font-size:11px;color:#666;margin-top:6px}*/
+
+
+      /* each box gets an accent color via --accent CSS variable (set by JS) */
+      .box{background:#fff;border:1px solid #e6e6e6;border-radius:8px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;min-height:72px;position:relative;overflow:hidden}
+      .box::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--accent, #1f77b4); border-top-left-radius:8px; border-bottom-left-radius:8px; }
+      .box .name{font-size:12px;color:#444;margin-bottom:6px;word-break:break-word;padding-left:8px}
+      .box .value{font-size:18px;font-weight:700;color:var(--accent, #1f77b4);min-height:1em;padding-left:8px}
+      .box .meta{font-size:11px;color:#666;margin-top:6px;padding-left:8px}
+
+
+
+      .controls-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+       /* small red welcome box (placed above the grid) */
+      #welcomeBox{
+        background:#e60000;
+        color:#fff;
+        padding:8px 12px;
+        border-radius:6px;
+        display:inline-block;
+        font-weight:700;
+        margin:10px 0;
+        box-shadow:0 4px 10px rgba(0,0,0,0.12);
+      }
+    
+    /* Ensure dropdown/select text is visible (black) */
+    /* Place after other rules so it overrides earlier color settings */
+    select, .controlStrip select, .panelStrip select, #controls select { color: #000 !important; background: #fff !important; }
+    select option, .controlStrip select option, .panelStrip select option { color: #000 !important; }

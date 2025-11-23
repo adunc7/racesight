@@ -1,0 +1,73 @@
+ body { font-family: sans-serif; background: #ffffff; margin: 12px; } 
+
+
+    
+
+    /* simple top nav */
+  .navbar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 20px 20px;
+      background: #000000;
+      color: #fff;
+      border-radius: 6px;
+      margin-bottom: 14px;
+    }
+    .nav-brand { font-size: 20px; font-weight:700; letter-spacing: .4px; }
+    .nav-links { display:flex; gap:12px; margin-left: 12px; }
+    .nav-link {
+      color: #ddd;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 2px;
+      font-size: 14px;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.06); color: #eb0a1e; }
+
+    /* svg */
+    svg { border: 1px solid #ccc; background: white; overflow: visible; display: block; }
+
+    /* increase space between controls and plot */
+    #controls { display:flex; gap: 50px; align-items:flex-start; }
+    .controls-col { display:flex; flex-direction:column; gap:8px; width:260px; }
+
+    /* driver list */
+    #driverList { max-height:220px; overflow:auto; border:1px solid #ddd; padding:8px; background:white; width:100%; }
+
+    /* axis selector area under drivers */
+    #axisSelectors { margin-top:8px; border-top:1px solid #f0f0f0; padding-top:8px; }
+    #axisSelectors label { display:block; font-size:13px; margin-bottom:4px; }
+    #axisSelectors select { width:100%; padding:6px 8px; margin-bottom:8px; }
+
+    .axis-label { font-size: 13px; fill: #333; }
+    .label-text { font-size: 11px; fill: white; font-weight: 600; pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+    .tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(0,0,0,0.85);
+      color: white;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: none;
+      z-index: 10;
+    }
+    .driver-checkbox { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+    .btn { padding:6px 8px; border:1px solid #0b0c0a; border-radius: 5px; color:#fff; background:#e60303; cursor:pointer; }
+    .btn:active { transform:translateY(1px); }
+
+    /* plot + legend layout: svg and HTML legend side-by-side */
+    #plotWrapper { display:flex; gap:12px; align-items:flex-start; }
+    #legendContainer {
+      min-width:140px;
+      max-width:260px;
+      max-height:400px; 
+      overflow:auto;
+      background:#fff;
+      border:1px solid #eee;
+      padding:8px;
+      box-shadow:0 1px 4px rgba(0,0,0,0.06);
+    }
+    #legendContainer .row { display:flex; gap:8px; align-items:center; margin:4px 0; font-size:13px; }
+    #legendContainer .swatch { width:14px; height:14px; border:1px solid #ccc; }

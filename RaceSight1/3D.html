@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>3D</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html,body { height:100%; margin:0; font-family: Arial, sans-serif; }
+
+     /* simple top nav */
+    .navbar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 20px 20px;
+      background: #000000;
+      color: #fff;
+      border-radius: 6px;
+      margin-bottom: 14px;
+    }
+    .nav-brand { font-size: 20px; font-weight:700; letter-spacing: .4px; }
+    .nav-links { display:flex; gap:12px; margin-left: 12px; }
+    .nav-link {
+      color: #ddd;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 2px;
+      font-size: 14px;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.06); color: #eb0a1e; }
+
+
+
+
+    #container { width:100%; height:100vh; display:block; }
+    #ui { position: absolute; left:10px; top:100px; background:rgba(255,255,255,0.9); padding:8px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+    #status { margin-top:6px; font-size:12px; color:#333; }
+  </style>
+</head>
+<body>
+
+  
+   <nav class="navbar" role="navigation" aria-label="Main">
+    <div class="nav-brand">Race Sight</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html" id="nav-home">Results</a>
+      <a class="nav-link" href="2-best-10-laps.html" id="nav-about">Best 10</a>
+      <a class="nav-link" href="3-driver-performance.html" id="nav-contact">Driver Endurance</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v1-display.html" id="nav-contact1">Dashboard - Display</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v2-grid.html" id="nav-contact2">Dashboard - Grid</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v3-graphs.html" id="nav-contact3">Dashboard - Graphs </a>
+      <a class="nav-link" href="5-compare-drivers.html" id="nav-contact4">Compare Drivers </a>
+      <a class="nav-link" href="5-compare-races-dashboard.html" id="nav-contact5">Compare Races </a>
+      <a class="nav-link" href="3D.html" id="nav-contact6">3D </a>
+
+    </div>
+  </nav>
+
+<h2>Driver 13 </h2>
+
+  <div id="container"></div>
+  <div id="ui">
+    <div>
+      Lap: <select id="lapSelect" style="width:120px"><option value="5">5</option></select>
+      <button id="loadBtn">Refresh</button>
+      <button id="playBtn">Play</button>
+      <button id="pauseBtn">Pause</button>
+    </div>
+    <div id="status">Status: idle</div>
+    <div style="margin-top:6px">
+      Scale: <input id="scaleInput" type="number" step="0.001" value="0.5" style="width:100px" />
+      <button id="applyScaleBtn">Apply</button>
+    </div>
+    <div style="margin-top:6px">
+      Path thickness: <input id="pathThickness" type="range" min="0.5" max="60" step="0.5" value="8" /> <span id="pathThicknessVal">8</span>
+      <br />
+      Speed thickness: <input id="speedThickness" type="range" min="0.5" max="40" step="0.5" value="5" /> <span id="speedThicknessVal">5</span>
+    </div>
+    <div style="margin-top:6px">
+      Overlays:
+      <label><input type="checkbox" id="overlay_speed" checked /> speed</label>
+      <label><input type="checkbox" id="overlay_gear" checked /> gear</label>
+      <label><input type="checkbox" id="overlay_aps" checked /> aps</label>
+      <label><input type="checkbox" id="overlay_nmot" checked /> nmot</label>
+    </div>
+    <div style="margin-top:6px">
+      <label><input type="checkbox" id="followCamera" /> Follow camera</label>
+    </div>
+    <div style="margin-top:6px">
+      Car scale: <input id="carScale" type="range" min="0.1" max="8" step="0.05" value="2.0" /> <span id="carScaleVal">2.00</span>
+    </div>
+    <div id="statusScale" style="font-size:12px;color:#333;margin-top:4px">Scale: 0.5</div>
+    
+  </div>
+
+  <!-- Import map so example modules that import 'three' can resolve in the browser -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.skypack.dev/three@0.152.2"
+    }
+  }
+  </script>
+
+  <script type="module">
+  import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
+  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
+
+  // Configuration
+  const DATA_URL = "https://fulxwiizgkbyspqyluzc.supabase.co/storage/v1/object/sign/racingfiles/vehicle_13_test_laps_2_3_4.json?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83MDA1NzQ3OC1mMDg3LTRlZTktYTRhNy03M2QzNmNlNzYyNTgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJyYWNpbmdmaWxlcy92ZWhpY2xlXzEzX3Rlc3RfbGFwc18yXzNfNC5qc29uIiwiaWF0IjoxNzYzODU0MjI2LCJleHAiOjE3NjY0NDYyMjZ9.kb2PsL0-IoVT9SPyoUuMQk-3llO7IC4n1s3OX8j8KEY"; // relative to this HTML file
+  const DEFAULT_LAP = 3;
+  const DEFAULT_DURATION_SEC = 12; // fallback duration if timestamps missing
+
+  const container = document.getElementById('container');
+  const statusEl = document.getElementById('status');
+  const lapSelect = document.getElementById('lapSelect');
+  const loadBtn = document.getElementById('loadBtn');
+  const playBtn = document.getElementById('playBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  // debug panel removed
+  const scaleInput = document.getElementById('scaleInput');
+  const applyScaleBtn = document.getElementById('applyScaleBtn');
+  const statusScale = document.getElementById('statusScale');
+
+  let scene, camera, renderer, controls;
+  let pathLine, cube;
+  let speedLine = null;
+
+
+  //Ground Plane 
+  let groundPlane = null;
+
+
+
+  let carGltf = null;
+  let carDefaultUrl = 'car3.glb';
+   let carDefaultScale = 2.0; // default scale (increased to avoid tiny models)
+  // vertical offset applied to vehicle so wheels are visible above the track
+  let vehicleYOffset = 2.0;
+  // rotation offset to align model forward axis to world-forward; adjust if model faces wrong direction
+  // default was +90deg, but we add 180deg to flip model so it drives forward
+
+  
+  let modelForwardOffset = -Math.PI / 2; // equivalent to (Math.PI/2 + Math.PI) mod 2PI
+  const gltfLoader = new GLTFLoader();
+  let points = [];
+  let rawLatLonPoints = [];
+  let speeds = [];
+  let telemetryArrayCache = null;
+  let times = []; // seconds (relative)
+  let animationStart = null;
+  let paused = true;
+  let duration = DEFAULT_DURATION_SEC;
+  let scaleFactor = Number(scaleInput.value) || 0.5;
+  // tube radii (world units) controllable via UI
+  let pathTubeRadius = 8; // default visible radius
+  let speedTubeRadius = 5; // default visible radius
+  // camera follow settings
+  let followHeight = 18; // world units above the cube
+  let followDistance = 70; // world units behind the cube (z-offset)
+  let followLerp = 0.12; // smoothing factor (0..1)
+  // overlay telemetry arrays (aligned with rawLatLonPoints/points)
+  let telemetryValues = { speed: [], gear: [], aps: [], nmot: [] };
+  const overlayMeshes = {}; // name -> mesh
+
+  function buildCoordsFromRaw(rawList, scale){
+    if(!rawList || rawList.length === 0) return [];
+    const origin = rawList[0];
+    return rawList.map(p => {
+      const m = metersFromLatLon(origin.lat, origin.lon, p.lat, p.lon);
+      const y = (p.raw && (p.raw.alt || p.raw.elevation || p.raw.height)) || 0;
+      return new THREE.Vector3(m[0] * scale, y * scale, m[1] * scale);
+    });
+  }
+
+  function rebuildPathWithScale(){
+    if(!rawLatLonPoints || rawLatLonPoints.length === 0) return;
+    points = buildCoordsFromRaw(rawLatLonPoints, scaleFactor);
+    buildPathVisual(points);
+  }
+
+  applyScaleBtn.addEventListener('click', () => {
+    scaleFactor = Number(scaleInput.value) || 0.01;
+    statusScale.textContent = 'Scale: ' + scaleFactor;
+    rebuildPathWithScale();
+  });
+
+  // thickness controls
+  const pathThickness = document.getElementById('pathThickness');
+  const pathThicknessVal = document.getElementById('pathThicknessVal');
+  const speedThickness = document.getElementById('speedThickness');
+  const speedThicknessVal = document.getElementById('speedThicknessVal');
+  pathThickness.addEventListener('input', () => {
+    pathThicknessVal.textContent = pathThickness.value;
+  });
+  speedThickness.addEventListener('input', () => {
+    speedThicknessVal.textContent = speedThickness.value;
+  });
+  // apply thickness when slider change ends (or you can use 'input' for live updates)
+  pathThickness.addEventListener('change', () => { pathTubeRadius = Number(pathThickness.value); rebuildPathWithScale(); });
+  speedThickness.addEventListener('change', () => { speedTubeRadius = Number(speedThickness.value); rebuildPathWithScale(); });
+
+  // overlay checkboxes
+  const overlaySpeedCb = document.getElementById('overlay_speed');
+  const overlayGearCb = document.getElementById('overlay_gear');
+  const overlayApsCb = document.getElementById('overlay_aps');
+  const overlayNmotCb = document.getElementById('overlay_nmot');
+  const followCameraCb = document.getElementById('followCamera');
+  const carScaleEl = document.getElementById('carScale');
+  const carScaleValEl = document.getElementById('carScaleVal');
+  [overlaySpeedCb, overlayGearCb, overlayApsCb, overlayNmotCb].forEach(cb => cb.addEventListener('change', () => rebuildPathWithScale()));
+  if(carScaleEl){ carScaleValEl.textContent = Number(carScaleEl.value).toFixed(2); carScaleEl.addEventListener('input', ()=>{ carScaleValEl.textContent = Number(carScaleEl.value).toFixed(2); }); carScaleEl.addEventListener('change', ()=>{ carDefaultScale = Number(carScaleEl.value) || 1; if(cube) cube.scale.setScalar(carDefaultScale); }); }
+
+  initThree();
+  loadLap(DEFAULT_LAP);
+
+  loadBtn.addEventListener('click', () => {
+    const v = lapSelect.value;
+    const lap = (v === 'all') ? null : Number(v);
+    loadLap(lap);
+  });
+  lapSelect.addEventListener('change', () => {
+    const v = lapSelect.value;
+    const lap = (v === 'all') ? null : Number(v);
+    loadLap(lap);
+  });
+  playBtn.addEventListener('click', () => { if(points.length) { paused = false; if(!animationStart) animationStart = performance.now(); } });
+  pauseBtn.addEventListener('click', () => { paused = true; });
+
+  function setStatus(s) { statusEl.textContent = 'Status: ' + s; }
+
+  function initThree(){
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x00f0f0f0);
+    camera = new THREE.PerspectiveCamera(80, window.innerWidth/window.innerHeight, 0.1, 1000000);
+    camera.position.set(0, 80, 180);
+    renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+    // Lightweight custom orbit controls (mouse drag to rotate, wheel to zoom)
+    controls = {
+      target: new THREE.Vector3(0,0,0)
+    };
+    let isDragging = false;
+    let prevX = 0, prevY = 0;
+    const spherical = { radius: 240, phi: Math.PI/3, theta: Math.PI/2 };
+
+    function updateCameraFromSpherical(){
+      const r = spherical.radius;
+      const phi = Math.max(0.01, Math.min(Math.PI - 0.01, spherical.phi));
+      const theta = spherical.theta;
+      const x = controls.target.x + r * Math.sin(phi) * Math.cos(theta);
+      const y = controls.target.y + r * Math.cos(phi);
+      const z = controls.target.z + r * Math.sin(phi) * Math.sin(theta);
+      camera.position.set(x,y,z);
+      camera.lookAt(controls.target);
+    }
+    updateCameraFromSpherical();
+    // expose update so other code (buildPathVisual) can call it
+    controls.update = updateCameraFromSpherical;
+
+    renderer.domElement.addEventListener('mousedown', (ev) => { isDragging = true; prevX = ev.clientX; prevY = ev.clientY; });
+    window.addEventListener('mousemove', (ev) => {
+      if(!isDragging) return;
+      const dx = (ev.clientX - prevX) * 0.005;
+      const dy = (ev.clientY - prevY) * 0.005;
+      prevX = ev.clientX; prevY = ev.clientY;
+      spherical.theta -= dx;
+      spherical.phi -= dy;
+      updateCameraFromSpherical();
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    renderer.domElement.addEventListener('wheel', (ev) => {
+      ev.preventDefault();
+      spherical.radius += ev.deltaY * 0.1;
+      spherical.radius = Math.max(10, Math.min(2000, spherical.radius));
+      updateCameraFromSpherical();
+    }, { passive: false });
+
+    const grid = new THREE.GridHelper(500, 50, 0x888888, 0xdddddd);
+    scene.add(grid);
+
+    const light = new THREE.DirectionalLight(0xffffff, 0.9);
+    light.position.set(0,100,100);
+    scene.add(light);
+
+    // Simple grey ground plane as base
+    try{
+      const size = 3000;
+      const planeGeo = new THREE.PlaneGeometry(size, size, 1, 1);
+      const planeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.02, roughness: 0.95, side: THREE.DoubleSide });
+      groundPlane = new THREE.Mesh(planeGeo, planeMat);
+      groundPlane.rotation.x = -Math.PI/2; // make it horizontal (XZ)
+      groundPlane.position.y = -0.5; // slightly below zero to avoid z-fighting
+      groundPlane.receiveShadow = true;
+      scene.add(groundPlane);
+    }catch(e){ console.warn('could not create ground plane', e); }
+
+    window.addEventListener('resize', onWindowResize);
+    animate();
+  }
+
+  function onWindowResize(){
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  function findPointsArray(obj){
+    if(Array.isArray(obj)) return obj;
+    // common keys to check
+    const candidates = ['points','telemetry','track','data','samples','positions','gps'];
+    for(const k of candidates){ if(Array.isArray(obj[k])) return obj[k]; }
+    // fallback: find first array value
+    for(const k in obj){ if(Array.isArray(obj[k])) return obj[k]; }
+    return null;
+  }
+
+  function getLapNumber(p){
+    return p.lap || p.lapNumber || p.lap_no || p.lapIndex || p.lap_number || p.lapNum || p.lapnum || p.lapNo || null;
+  }
+
+  function getLatLon(p){
+    // try common fields
+    if(p.latitude !== undefined && p.longitude !== undefined) return [p.latitude, p.longitude];
+    if(p.lat !== undefined && (p.lon !== undefined || p.lng !== undefined)) return [p.lat, p.lon !== undefined ? p.lon : p.lng];
+    if(p.gps && p.gps.lat !== undefined && (p.gps.lon !== undefined || p.gps.lng !== undefined)) return [p.gps.lat, p.gps.lon !== undefined ? p.gps.lon : p.gps.lng];
+    if(p.y !== undefined && p.x !== undefined) return [p.y, p.x]; // sometimes x=lon, y=lat
+    if(p.position && p.position.lat !== undefined) return [p.position.lat, p.position.lon || p.position.lng];
+    // VBOX-style fields (examples: VBOX_Lat_Min, VBOX_Long_Minutes)
+    const keys = Object.keys(p || {});
+    const lower = {};
+    for(const k of keys) lower[k.toLowerCase()] = k;
+    const latKey = lower['vbox_lat_mins'] || lower['vbox_lat_minutes'] || lower['vbox_lat_min'] || lower['vbox_lat'];
+    const lonKey = lower['vbox_long_minutes'] || lower['vbox_long_min'] || lower['vbox_long'] || lower['vbox_lon'];
+    if(latKey && lonKey){
+      const rawLat = p[latKey];
+      const rawLon = p[lonKey];
+      const lat = parseVboxCoord(rawLat, 'lat');
+      const lon = parseVboxCoord(rawLon, 'lon');
+      if(lat !== null && lon !== null) return [lat, lon];
+    }
+    return null;
+  }
+
+  function getSpeedValue(p){
+    if(!p) return null;
+    // common direct fields
+    const candidates = ['speed','Speed','speed_kmh','speed_kph','speed_mps','vbox_speed','speed_mph','spd'];
+    for(const k of candidates){ if(p[k] !== undefined && p[k] !== null) return Number(p[k]); }
+    // sometimes speed is nested in telemetry_name pivoted objects (string values)
+    // try to find any key that looks like speed
+    for(const k of Object.keys(p||{})){
+      if(/speed/i.test(k)){
+        const v = p[k];
+        const n = Number(v);
+        if(!Number.isNaN(n)) return n;
+      }
+    }
+    return null;
+  }
+
+  function getTelemetryValue(p, name){
+    if(!p) return null;
+    const key = name.toLowerCase();
+    // common name mappings
+    const mappings = {
+      gear: ['gear','g','gear_no','gearposition'],
+      aps: ['aps','throttle','throttle_pos','accelerator','accelerator_position','throttleposition'],
+      nmot: ['nmot','rpm','engine_rpm','engine','motor_rpm']
+    };
+    const candidates = mappings[key] || [name];
+    // try direct candidates
+    for(const k of candidates){
+      if(p[k] !== undefined && p[k] !== null) return Number(p[k]);
+      // case-insensitive search
+      for(const kk of Object.keys(p||{})){
+        if(kk.toLowerCase() === k.toLowerCase()){
+          const v = p[kk];
+          const n = Number(v);
+          if(!Number.isNaN(n)) return n;
+        }
+      }
+    }
+    // last resort: find any key containing the name
+    for(const kk of Object.keys(p||{})){
+      if(kk.toLowerCase().includes(key)){
+        const v = p[kk];
+        const n = Number(v);
+        if(!Number.isNaN(n)) return n;
+      }
+    }
+    return null;
+  }
+
+  function speedToColor(speed, min, max){
+    // map speed to hue from blue(0.66) -> green -> yellow -> red(0.0)
+    if(speed === null || speed === undefined) return new THREE.Color(0x888888);
+    if(max <= min) return new THREE.Color().setHSL(0.33, 1.0, 0.5);
+    const t = Math.max(0, Math.min(1, (speed - min) / (max - min)));
+    const hue = 0.66 * (1 - t); // 0.66 (blue) to 0 (red)
+    return new THREE.Color().setHSL(hue, 1.0, 0.5);
+  }
+
+  function parseVboxCoord(v, kind){
+    if(v === null || v === undefined) return null;
+    // numeric or numeric-string
+    const s = (typeof v === 'string') ? v.trim() : String(v);
+    const num = Number(s);
+    if(!Number.isNaN(num)){
+      // heuristics:
+      // - if absolute value looks like minutes (>> 90 for lat, >> 180 for lon) treat as minutes and divide by 60
+      // - if value looks like ddmm.mmmm (e.g. 3359.1234) treat as degrees = floor(v/100), minutes = v - degrees*100
+      const abs = Math.abs(num);
+      if((kind === 'lat' && abs > 90) || (kind === 'lon' && abs > 180)){
+        // treat as minutes-only
+        return num / 60.0;
+      }
+      // ddmm.mmmm style detection (value > 100 and not simply degrees)
+      if(abs >= 100 && abs < 10000){
+        const deg = Math.trunc(num / 100);
+        const mins = Math.abs(num - deg * 100);
+        return (num < 0 ? -1 : 1) * (Math.abs(deg) + mins/60.0);
+      }
+      // otherwise assume already decimal degrees
+      return num;
+    }
+    // try parsing D M S like "33 45.1234"
+    const parts = s.split(/[ ,;:°"']+/).filter(Boolean);
+    if(parts.length >= 2){
+      const d = Number(parts[0]);
+      const m = Number(parts[1]);
+      if(!Number.isNaN(d) && !Number.isNaN(m)) return (d >= 0 ? 1 : -1) * (Math.abs(d) + (m/60));
+    }
+    return null;
+  }
+
+  function getTimeSeconds(p, baseTime){
+    // Accept ISO timestamps or ms since epoch or seconds
+    if(p.timestamp !== undefined) return toSeconds(p.timestamp, baseTime);
+    if(p.time !== undefined) return toSeconds(p.time, baseTime);
+    if(p.t !== undefined) return toSeconds(p.t, baseTime);
+    return null;
+  }
+
+  function toSeconds(v, baseTime){
+    if(v === null || v === undefined) return null;
+    // if string ISO date
+    if(typeof v === 'string'){
+      const d = Date.parse(v);
+      if(!isNaN(d)) return (d - baseTime)/1000.0;
+    }
+    // if large number assume ms since epoch
+    if(typeof v === 'number'){
+      if(v > 1e12) return (v - baseTime)/1000.0; // ms
+      if(v > 1e9) return (v - baseTime); // seconds epoch? unlikely
+      return v; // already seconds relative
+    }
+    return null;
+  }
+
+  function metersFromLatLon(lat0, lon0, lat, lon){
+    // simple equirectangular approximation
+    const R = 6378137; // meters
+    const dLat = (lat - lat0) * Math.PI/180;
+    const dLon = (lon - lon0) * Math.PI/180;
+    const x = dLon * R * Math.cos(lat0 * Math.PI/180);
+    const z = dLat * R * -1; // invert so north is -z (so map looks like typical 3D ground plane)
+    return [x, z];
+  }
+
+  function populateLapSelector(arr){
+    const set = new Set();
+    for(const p of arr){
+      const lp = getLapNumber(p);
+      if(lp !== null && lp !== undefined){
+        const n = Number(lp);
+        if(!Number.isNaN(n)) set.add(n);
+      }
+    }
+    const options = Array.from(set).sort((a,b)=>a-b);
+    lapSelect.innerHTML = '';
+    const allOpt = document.createElement('option'); allOpt.value = 'all'; allOpt.text = 'All'; lapSelect.appendChild(allOpt);
+    for(const n of options){ const opt = document.createElement('option'); opt.value = String(n); opt.text = String(n); lapSelect.appendChild(opt); }
+    if(options.includes(DEFAULT_LAP)) lapSelect.value = String(DEFAULT_LAP);
+    else if(options.length) lapSelect.value = String(options[0]);
+  }
+
+  async function loadLap(lapNumber){
+    setStatus('loading JSON...');
+    paused = true;
+    animationStart = null;
+    try{
+      let arr;
+      if(telemetryArrayCache){
+        arr = telemetryArrayCache;
+      } else {
+        const resp = await fetch(DATA_URL);
+        if(!resp.ok) throw new Error('Failed to fetch JSON: ' + resp.status);
+        const json = await resp.json();
+        arr = findPointsArray(json);
+        if(!arr) throw new Error('Could not find telemetry array in JSON');
+
+        // Debugging output removed
+
+        // Detect telemetry name/value pair format and pivot into per-timestamp objects
+        function hasTelemetryPairs(a){
+          if(!Array.isArray(a) || a.length === 0) return false;
+          // check a sample of objects for telemetry_name and telemetry_value (case-insensitive)
+          let count = 0;
+          for(let i=0;i<Math.min(30,a.length);i++){
+            const keys = Object.keys(a[i]||{}).map(k=>k.toLowerCase());
+            if(keys.includes('telemetry_name') && (keys.includes('telemetry_value') || keys.includes('telemetry_val') )) count++;
+          }
+          return count > 0;
+        }
+
+        let telemetryRows = false;
+        if(hasTelemetryPairs(arr)){
+          telemetryRows = true;
+          // pivot
+          const map = new Map();
+          // choose timestamp key if present
+          const preferredTsKeys = ['timestamp','time','meta_time','meta_time'];
+          const sampleKeysLower = Object.keys(arr[0]||{}).map(k=>k.toLowerCase());
+          const tsKey = preferredTsKeys.find(k=> sampleKeysLower.includes(k)) || null;
+          // find actual key names for telemetry_name and telemetry_value (case-sensitive lookup)
+          let tnKey=null, tvKey=null, lapKey=null;
+          for(const k of Object.keys(arr[0]||{})){
+            const kl = k.toLowerCase();
+            if(kl === 'telemetry_name') tnKey = k;
+            if(kl === 'telemetry_value' || kl === 'telemetry_val') tvKey = k;
+            if(kl === 'lap' || kl === 'lapnumber' || kl==='lap_no') lapKey = k;
+          }
+          for(let i=0;i<arr.length;i++){
+            const row = arr[i];
+            const tRaw = (tsKey && row[tsKey]!==undefined) ? row[tsKey] : (row.timestamp||row.time||row.meta_time||row.meta_time);
+            const tKey = (tRaw !== undefined && tRaw !== null) ? String(tRaw) : '__i__' + i;
+            if(!map.has(tKey)) map.set(tKey, {__rows:[], timestamp: tRaw});
+            const obj = map.get(tKey);
+            // assign telemetry value under its name
+            const name = row[tnKey] || row['telemetry_name'] || row['telemetryName'];
+            const val = row[tvKey] || row['telemetry_value'] || row['telemetryVal'] || row['telemetryValue'];
+            if(name) obj[name] = val;
+            // copy lap if present
+            if(lapKey && row[lapKey] !== undefined) obj.lap = row[lapKey];
+            // copy vehicle id/other useful metadata if present
+            if(row.vehicle_id) obj.vehicle_id = row.vehicle_id;
+            obj.__rows.push(row);
+          }
+          // produce new arr from map
+          const pivoted = Array.from(map.values());
+          // try to sort by timestamp if available
+          pivoted.sort((a,b)=>{
+            const ta = Date.parse(a.timestamp) || 0;
+            const tb = Date.parse(b.timestamp) || 0;
+            return ta - tb;
+          });
+          // replace arr
+          arr = pivoted;
+          // telemetry rows pivoted into objects (no debug output)
+        }
+
+        // cache the prepared telemetry array so subsequent lap selections are fast
+        telemetryArrayCache = arr;
+      }
+
+      // populate lap selector from array
+      try{ populateLapSelector(arr); } catch(e){}
+
+      // Diagnostic: find objects that look like they contain VBOX/GPS fields
+      const gpsKeyRegex = /vbox|lat|lon|long|gps|position/i;
+      const gpsIndices = [];
+      for(let i=0;i<arr.length;i++){
+        const keys = Object.keys(arr[i] || {});
+        if(keys.some(k=>gpsKeyRegex.test(k))) gpsIndices.push(i);
+      }
+      // GPS-like keys diagnostic removed from debug output
+      if(gpsIndices.length === 0){
+        // no gps-like keys found
+      }
+
+      // find lap property name and normalize
+      // Filter points with lap equal to lapNumber. Support string numbers.
+      const lapFiltered = arr.filter(p => {
+        const lp = getLapNumber(p);
+        if(lp === null || lp === undefined) return false;
+        const n = Number(lp);
+        return !Number.isNaN(n) && n === lapNumber;
+      });
+
+      if(lapFiltered.length === 0){
+        // fallback: try to parse lat/lon from any point in the array even if lap property missing/different
+        const anyLatlon = [];
+        for(const p of arr){
+          const l = getLatLon(p);
+          if(l) anyLatlon.push({lat:l[0], lon:l[1], raw:p});
+        }
+        if(anyLatlon.length > 0){
+          setStatus('lap ' + lapNumber + ' not found — using all parsed coordinates (' + anyLatlon.length + ' points).');
+          // use these points as the path (no times)
+          rawLatLonPoints = anyLatlon;
+          const coords = buildCoordsFromRaw(rawLatLonPoints, scaleFactor);
+          points = coords;
+          buildPathVisual(points);
+          try{ lapSelect.value = (lapNumber === null || lapNumber === undefined) ? 'all' : String(lapNumber); }catch(e){}
+          return;
+        }
+        setStatus('no points found for lap ' + lapNumber + ' (check lap property name)');
+        return;
+      }
+
+      // extract lat/lon and times
+      const latlonList = [];
+      const timeList = [];
+      // try to find baseTime for timestamps if present
+      let baseEpoch = null;
+      for(const p of lapFiltered){
+        const l = getLatLon(p);
+        if(l){
+          const sp = getSpeedValue(p);
+          const g = getTelemetryValue(p, 'gear');
+          const a = getTelemetryValue(p, 'aps');
+          const n = getTelemetryValue(p, 'nmot');
+          latlonList.push({lat:l[0], lon:l[1], raw:p, speed: sp, gear: g, aps: a, nmot: n});
+        }
+      }
+      if(latlonList.length === 0){ setStatus('no lat/lon fields found in lap points'); return; }
+
+      // times
+      // try to get base epoch from first timestamp if present
+      const firstTimeRaw = lapFiltered.find(p => p.timestamp || p.time || p.t);
+      if(firstTimeRaw){
+        const v = firstTimeRaw.timestamp || firstTimeRaw.time || firstTimeRaw.t;
+        if(typeof v === 'string') baseEpoch = Date.parse(v);
+        else if(typeof v === 'number' && v > 1e12) baseEpoch = Math.floor(v);
+      }
+
+      for(const p of lapFiltered){
+        const t = getTimeSeconds(p, baseEpoch || 0);
+        timeList.push(t);
+      }
+
+      // store raw lat/lon points and build scaled coords
+      rawLatLonPoints = latlonList;
+      const coords = buildCoordsFromRaw(rawLatLonPoints, scaleFactor);
+
+      // extract telemetry aligned with coords (may be nulls)
+      speeds = rawLatLonPoints.map(r => (r && r.speed !== undefined ? r.speed : null));
+      telemetryValues.gear = rawLatLonPoints.map(r => (r && r.gear !== undefined ? r.gear : null));
+      telemetryValues.aps = rawLatLonPoints.map(r => (r && r.aps !== undefined ? r.aps : null));
+      telemetryValues.nmot = rawLatLonPoints.map(r => (r && r.nmot !== undefined ? r.nmot : null));
+
+      // If times are mostly null, create evenly spaced times across DEFAULT_DURATION_SEC
+      const hasSomeTimes = timeList.some(t => t !== null && t !== undefined);
+      if(hasSomeTimes){
+        // normalize times to start at 0
+        const validTimes = timeList.map(t => (t===null?null:t));
+        const firstValid = validTimes.find(t=>t!==null);
+        const base = firstValid || 0;
+        times = validTimes.map(t => (t===null?null:t-base));
+        // fill nulls by linear interpolation
+        for(let i=0;i<times.length;i++){
+          if(times[i] === null){
+            // find neighbours
+            let j=i+1; while(j<times.length && times[j]===null) j++;
+            let k=i-1; while(k>=0 && times[k]===null) k--;
+            const t0 = (k>=0?times[k]:0);
+            const t1 = (j<times.length?times[j]:(t0 + (DEFAULT_DURATION_SEC/(times.length||1))));
+            const gap = j - k;
+            for(let x=k+1;x<j;x++){
+              times[x] = t0 + (t1 - t0) * ((x - k) / gap);
+            }
+            i = j;
+          }
+        }
+        duration = times[times.length-1];
+      } else {
+        // create even spacing
+        duration = DEFAULT_DURATION_SEC;
+        times = coords.map((_,i) => (i/(coords.length-1)) * duration);
+      }
+
+      // store points and build visuals
+      points = coords;
+      buildPathVisual(points);
+      // ensure the lap selector reflects the currently loaded lap
+      try{ if(lapNumber === null || lapNumber === undefined) lapSelect.value = 'all'; else lapSelect.value = String(lapNumber); }catch(e){}
+      setStatus('loaded lap ' + lapNumber + ' — ' + points.length + ' points, duration ~' + duration.toFixed(2) + 's');
+      // reset animation
+      animationStart = null;
+      paused = true;
+    }catch(err){
+      console.error(err);
+      setStatus('error: ' + err.message);
+    }
+  }
+
+  function buildPathVisual(points){
+    // clear previous
+    if(pathLine){ try{ if(pathLine.geometry) pathLine.geometry.dispose(); if(pathLine.material) pathLine.material.dispose(); }catch(e){} scene.remove(pathLine); pathLine = null; }
+    if(cube){ try{ if(cube.geometry) cube.geometry.dispose(); if(cube.material) cube.material.dispose(); }catch(e){} scene.remove(cube); cube = null; }
+    if(speedLine){ try{ if(speedLine.geometry) speedLine.geometry.dispose(); if(speedLine.material) speedLine.material.dispose(); }catch(e){} scene.remove(speedLine); speedLine = null; }
+
+    const pts = points.map(p => new THREE.Vector3(p.x, p.y, p.z));
+    // create a visible 3D tube for the path
+    try{
+      const curve = new THREE.CatmullRomCurve3(pts);
+      const tubularSegments = Math.max(64, Math.floor(pts.length * 2));
+      const radialSegments = 10;
+      const pathRadius = Math.max(0.5, pathTubeRadius);
+      const tubeGeom = new THREE.TubeGeometry(curve, tubularSegments, pathRadius, radialSegments, false);
+      const tubeMat = new THREE.MeshStandardMaterial({ color: 0x0066ff, metalness:0.2, roughness:0.5 });
+      pathLine = new THREE.Mesh(tubeGeom, tubeMat);
+      scene.add(pathLine);
+    }catch(e){
+      // fallback to simple line if TubeGeometry fails
+      const geom = new THREE.BufferGeometry().setFromPoints(pts);
+      const mat = new THREE.LineBasicMaterial({ color: 0x0066ff, linewidth: 6 });
+      pathLine = new THREE.Line(geom, mat);
+      scene.add(pathLine);
+    }
+
+    // Build colored overlays for selected telemetry (speed, gear, aps, nmot)
+    const overlays = [];
+    if(overlaySpeedCb && overlaySpeedCb.checked) overlays.push({name:'speed', values: speeds});
+    if(overlayGearCb && overlayGearCb.checked) overlays.push({name:'gear', values: telemetryValues.gear});
+    if(overlayApsCb && overlayApsCb.checked) overlays.push({name:'aps', values: telemetryValues.aps});
+    if(overlayNmotCb && overlayNmotCb.checked) overlays.push({name:'nmot', values: telemetryValues.nmot});
+
+    // remove previous overlay meshes
+    for(const k of Object.keys(overlayMeshes)){
+      const m = overlayMeshes[k];
+      if(m){ try{ if(m.geometry) m.geometry.dispose(); if(m.material) m.material.dispose(); }catch(e){} scene.remove(m); }
+      delete overlayMeshes[k];
+    }
+
+    for(let oi=0; oi<overlays.length; oi++){
+      const {name, values} = overlays[oi];
+      if(!values || values.length !== pts.length) continue;
+      try{
+        const offsetBase = Math.max(0.05, pathTubeRadius * 0.15);
+        const offsetY = offsetBase + oi * (Math.max(0.5, pathTubeRadius * 0.6));
+        const shiftedPts = pts.map(p => new THREE.Vector3(p.x, p.y + offsetY, p.z));
+        const curve = new THREE.CatmullRomCurve3(shiftedPts);
+        const tubularSegments = Math.max(64, Math.floor(pts.length * 2));
+        const radialSegments = 6;
+        const tubeRadius = (name === 'speed') ? Math.max(0.2, speedTubeRadius) : Math.max(0.2, speedTubeRadius * 0.9);
+        const geom = new THREE.TubeGeometry(curve, tubularSegments, tubeRadius, radialSegments, false);
+
+        // compute min/max
+        let min = Infinity, max = -Infinity;
+        for(const v of values){ if(v !== null && v !== undefined){ min = Math.min(min, v); max = Math.max(max, v); } }
+        if(!isFinite(min)){ min = 0; max = 0; }
+
+        // assign colors per ring
+        const rings = tubularSegments + 1;
+        const vertsPerRing = radialSegments + 1;
+        const colorAttr = new Float32Array(geom.attributes.position.count * 3);
+        for(let ring=0; ring<rings; ring++){
+          const t = ring / (rings - 1);
+          const sampleIdx = Math.round(t * (values.length - 1));
+          const c = speedToColor(values[sampleIdx], min, max);
+          for(let v=0; v<vertsPerRing; v++){
+            const vi = (ring * vertsPerRing + v) * 3;
+            colorAttr[vi+0] = c.r;
+            colorAttr[vi+1] = c.g;
+            colorAttr[vi+2] = c.b;
+          }
+        }
+        geom.setAttribute('color', new THREE.BufferAttribute(colorAttr, 3));
+        const mat = new THREE.MeshStandardMaterial({ vertexColors: true, metalness:0.05, roughness:0.6, side: THREE.DoubleSide });
+        const mesh = new THREE.Mesh(geom, mat);
+        overlayMeshes[name] = mesh;
+        scene.add(mesh);
+      }catch(e){
+        // fallback to colored line
+        const posArray = new Float32Array(pts.length * 3);
+        const colorArray = new Float32Array(pts.length * 3);
+        for(let i=0;i<pts.length;i++){
+          const p = pts[i];
+          posArray[i*3+0] = p.x;
+          posArray[i*3+1] = p.y + (oi+1) * 0.1;
+          posArray[i*3+2] = p.z;
+          const c = speedToColor(values[i], 0, 1);
+          colorArray[i*3+0] = c.r;
+          colorArray[i*3+1] = c.g;
+          colorArray[i*3+2] = c.b;
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        g.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+        const m = new THREE.LineBasicMaterial({ vertexColors: true });
+        const line = new THREE.Line(g, m);
+        overlayMeshes[name] = line;
+        scene.add(line);
+      }
+    }
+
+    // create vehicle mesh: try to use loaded car model (car3.glb), otherwise fallback to box and attempt to load the GLB
+    if(carGltf){
+      try{
+        cube = carGltf.clone(true);
+        cube.scale.setScalar(carDefaultScale);
+        cube.position.set(pts[0].x, pts[0].y + vehicleYOffset, pts[0].z);
+        cube.rotation.y = modelForwardOffset; // align model forward axis
+        scene.add(cube);
+      }catch(e){ console.warn('failed to instantiate carGltf', e); }
+    } else {
+      // attempt to load the default car model from workspace root
+      try{
+        gltfLoader.load(carDefaultUrl, (g)=>{
+          try{
+            carGltf = g.scene || (g.scenes && g.scenes[0]);
+            if(carGltf){
+              // remove fallback cube if present
+              try{ if(cube){ scene.remove(cube); if(cube.geometry) cube.geometry.dispose(); if(cube.material) cube.material.dispose(); } }catch(e){}
+              const inst = carGltf.clone(true);
+              inst.scale.setScalar(carDefaultScale);
+              inst.position.set(pts[0].x, pts[0].y + vehicleYOffset, pts[0].z);
+              inst.rotation.y = modelForwardOffset; // align loaded model forward axis
+              scene.add(inst);
+              cube = inst; // keep reference so animation moves it
+            }
+          }catch(err){ console.error('Error adding loaded car glTF', err); }
+        }, undefined, (err)=>{ console.warn('car glTF load failed', err); });
+      }catch(e){ console.warn('gltfLoader unavailable', e); }
+
+      // visible fallback box while model loads or if load fails
+      const boxGeo = new THREE.BoxGeometry(4,4,6);
+      const boxMat = new THREE.MeshStandardMaterial({ color: 0xff6600 });
+      cube = new THREE.Mesh(boxGeo, boxMat);
+      cube.position.set(pts[0].x, pts[0].y + vehicleYOffset, pts[0].z);
+      cube.rotation.y = modelForwardOffset; // rotate fallback box to match car forward
+      scene.add(cube);
+    }
+
+    // adjust camera and controls target
+    const mid = pts[Math.floor(pts.length/2)];
+    controls.target.copy(mid);
+    controls.update();
+  }
+
+  function samplePositionAt(t){
+    // t in seconds (0..duration). Linear interpolate between times[] and points[]
+    if(!points || points.length === 0) return null;
+    if(t <= times[0]) return points[0].clone();
+    if(t >= times[times.length-1]) return points[points.length-1].clone();
+    // find segment
+    let i = 0; while(i < times.length-1 && !(t >= times[i] && t <= times[i+1])) i++;
+    const t0 = times[i], t1 = times[i+1];
+    const a = (t - t0) / (t1 - t0);
+    const p0 = points[i], p1 = points[i+1];
+    return p0.clone().lerp(p1, a);
+  }
+
+  function animate(now){
+    requestAnimationFrame(animate);
+    if(!paused && points.length){
+      if(!animationStart) animationStart = now;
+      const elapsed = (now - animationStart)/1000.0; // seconds
+      const looped = Math.min(elapsed, duration);
+      const pos = samplePositionAt(looped);
+      if(pos && cube){
+        // update position with Y offset
+        cube.position.set(pos.x, pos.y + vehicleYOffset, pos.z);
+
+        // compute small look-ahead to determine forward direction for rotation
+        const lookAhead = 0.06; // seconds ahead to sample direction
+        const nextT = Math.min(looped + lookAhead, duration);
+        const nextPos = samplePositionAt(nextT);
+        if(nextPos){
+          const dir = new THREE.Vector3().subVectors(nextPos, pos);
+          if(dir.lengthSq() > 1e-6){
+            // desired yaw: atan2(dx, dz) because world Z is north-south in our projection
+            const desiredYaw = Math.atan2(dir.x, dir.z) + modelForwardOffset;
+            // smoothly interpolate current yaw towards desired yaw (shortest path)
+            const cur = cube.rotation.y || 0;
+            let diff = desiredYaw - cur;
+            // wrap to [-PI, PI]
+            diff = ((diff + Math.PI) % (2 * Math.PI)) - Math.PI;
+            const rotLerp = 0.18; // smoothing factor
+            cube.rotation.y = cur + diff * rotLerp;
+          }
+        }
+      }
+    }
+    // camera follow logic: smoothly position camera relative to cube when enabled
+    if(followCameraCb && followCameraCb.checked && cube){
+      // desired camera position is behind the cube (in +z) and above by followHeight
+      const desired = new THREE.Vector3(cube.position.x, cube.position.y + followHeight, cube.position.z + followDistance);
+      // initialize camera.position if it's nullish
+      camera.position.lerp(desired, followLerp);
+      camera.lookAt(cube.position);
+      // keep controls target near the cube so manual orbit still centers correctly
+      if(controls && controls.target) controls.target.copy(cube.position);
+    }
+    renderer.render(scene, camera);
+  }
+  </script>
+
+ 
+</body>
+</html>

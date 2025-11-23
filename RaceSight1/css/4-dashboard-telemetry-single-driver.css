@@ -1,0 +1,114 @@
+:root{--accent:#1f77b4;--muted:#eee}
+      body{
+        font-family:Arial,Helvetica,sans-serif;
+        margin:12px;
+        color:#000000;
+        min-height:100vh;
+        background:
+          linear-gradient(rgba(255, 255, 255, 10), rgba(255, 255, 255, 0.28)),
+          url("greyscale.jpg") center/cover fixed no-repeat;/*can change and add an image */
+        background-color:#ffffff;
+      }
+
+      .navbar { display: flex; align-items: center; gap: 24px; padding: 20px 20px; background: #000000; color: #fff; border-radius: 6px; margin-bottom: 14px; }
+      .nav-brand { font-size: 20px; font-weight:700; letter-spacing: .4px; }
+      .nav-links { display:flex; gap:12px; margin-left: 12px; }
+      .nav-link { color: #ddd; text-decoration: none; padding: 6px 10px; border-radius: 2px; font-size: 14px; }
+      .nav-link:hover { background: rgba(255,255,255,0.06); color: #eb0a1e; }
+
+      #welcomeBox{ background:#eb0a1e; color:#fff; padding:8px 12px; border-radius:6px; display:inline-block; font-weight:700; margin:10px 0; box-shadow:0 4px 10px rgba(0,0,0,0.12); }
+
+      .sideBySide{ display:flex; gap:16px; align-items:stretch; margin-top:12px; justify-content:space-between; }
+     .sideBySide > .panelStrip, .sideBySide > #weatherWrap{ flex: 1 1 50%; max-width: 50%; box-sizing: border-box; min-width: 260px; display:flex; flex-direction:column; }
+
+     .panelStrip .stat { min-width: auto; }
+
+      .timeBox{ background:#f6f6f7; border:1px solid #e2e2e2; padding:8px 12px; border-radius:6px; display:inline-block; margin:8px 0 14px 0; min-width:160px; }
+      .timeBox .label{font-size:12px;color:#666;margin-bottom:6px}
+      .timeBox .value{font-size:18px;font-weight:700;color:var(--accent)}
+
+
+
+
+    /*Control Strip at the top */
+     .controlStrip{ background: #000000;; padding:10px; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; box-shadow:0 6px 18px rgba(0,0,0,0.35); }
+     .controlStrip label{ color:#ddd; }
+     .controlStrip input, .controlStrip select, .controlStrip button{ background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color:#fff; padding:6px; border-radius:6px; }
+     .controlStrip input::placeholder{ color:#bbb; }
+     .controlStrip .controls-right{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+     .controlStrip button:hover{ filter:brightness(1.06); cursor:pointer; }
+
+
+
+
+      /*Panel for the Animated Steering, APS and Gear*/
+      .panelStrip{ background:#000000; color:#fff; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.35); margin-top:0; display:flex; flex-direction:column; }
+      .panelStrip .panel { margin:0; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+      .panelStrip .panel{ flex:1 1 auto; align-items:flex-start; }
+      .panelStrip .panel .stat{ align-self:stretch; display:flex; flex-direction:column; justify-content:center; }
+      .panelStrip .stat { background: transparent; border: 1px solid rgba(255,255,255,0.06); color: #fff; padding:10px 14px; border-radius:8px; min-width:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+      .panelStrip .stat .label { color: #ccc; font-size:13px; margin-bottom:6px; }
+      .panelStrip .stat .value { color: #fff; font-size:20px; font-weight:700; }
+      .panelStrip .radial .center .num { color: #fff; }
+      .panelStrip .radial .center .unit { color: #ddd; font-size:11px; }
+      .panelStrip img#circle { filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); width:120px; height:120px; transition:transform .2s linear; }
+
+      #controls{display:flex;gap:8px;align-items:center;margin:12px 0;flex-wrap:wrap}
+      select,input,button{padding:6px;border-radius:6px;border:1px solid #eb0a1e;background:#fff}
+      #map{height:360px;border-radius:10px}
+      #status{margin-top:8px;color:#444}
+
+  
+     /* Style for the Speed Dial  */
+
+      .radial { width:150px; height:150px; display:inline-block; position:relative; }
+      .radial svg{ width:100%; height:100%; transform:rotate(140deg); transform-origin:50% 50%; }
+      .radial .bg { stroke:var(--muted); stroke-width:12; fill:none; }
+      .radial .prog { stroke:var(--accent); stroke-width:12; stroke-linecap:round; fill:none; transition:stroke-dashoffset 260ms linear; }
+      .radial .center { position:absolute; left:0; top:0; right:0; bottom:0; display:flex;align-items:center;justify-content:center;flex-direction:column;pointer-events:none}
+      .radial .center .num{font-weight:700;font-size:18px;color:var(--accent)}
+      .radial .center .unit{font-size:12px;color:#677}
+
+
+      /* Style for APS, can also be used for throttle  */
+
+      .apsWrap{width:36px;height:92px;border-radius:6px;background:#fff;border:1px solid #e6e6e6;padding:6px;display:flex;align-items:center;justify-content:center}
+      .apsBar{width:12px;height:80px;background:linear-gradient(180deg,var(--muted) 0,var(--muted) 100%);border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:flex-end}
+      .apsBar .fill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(180deg,#04ff26,#a9e604);transition:height 180ms linear}
+      .apsPct{font-size:13px;color:#ffffff;margin-top:8px}
+
+      .stat.large{min-width:160px}
+      .controls-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+      .speed-under { font-size:18px; font-weight:700; color:#ffffff; margin-top:6px; text-align:center; }
+
+     /* WEATHER: render just like the .box style  */
+     .box{background:rgba(255,255,255,1);border:1px solid #f6f6f7;border-radius:8px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;min-height:72px;position:relative;overflow:hidden}
+     .box::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--accent, #1f77b4); border-top-left-radius:8px; border-bottom-left-radius:8px; }
+     .box .name{font-size:12px;color:#000000;margin-bottom:6px;word-break:break-word;padding-left:8px}
+     .box .value{font-size:18px;font-weight:700;color:var(--accent, #b41f1f);min-height:1em;padding-left:8px}
+     .box .meta{font-size:11px;color:#666;margin-top:6px;padding-left:8px}
+
+     /* make weather grid render inside a panel like the telemetry panel */
+     #weatherWrap{ background:#f6f6f7; color:var(--accent); padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.35); margin-top:0; display:flex; flex-direction:column; }
+     #weatherGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; flex:1 1 auto; overflow:auto; }
+     #weatherGrid .weatherTime{ background: rgba(255,255,255,0); border: 1px solid rgba(255,255,255,0.06); color:var(--accent); padding:8px; border-radius:8px; grid-column: 1 / -1; text-align:center; font-weight:700; }
+
+     @media (max-width:900px){ #weatherGrid{ grid-template-columns: repeat(1,1fr); } }
+
+    /* Ensure dropdown/select text is visible (black) */
+    /* Place after other rules so it overrides earlier color settings */
+    select, .controlStrip select, .panelStrip select, .panelControls select, #controls select { color: #000 !important; background: #fff !important; }
+    /* Option styling (browser support varies) */
+    select option, .controlStrip select option, .panelStrip select option { color: #000 !important; }
+
+      /* Use the same simple input styling as in v2 for consistency */
+      input[type="range"], #timeSlider {
+        padding:6px;
+        border-radius:6px;
+        border:1px solid #ccc;
+        background:#fff;
+        height:28px;
+      }
+
+     .headerRow{ display:flex; gap:12px; align-items:flex-start; justify-content:space-between; margin-bottom:8px; }
+     #weatherBox{ background:#e60000; color:#fff; padding:8px 12px; border-radius:6px; display:inline-block; font-weight:700; box-shadow:0 4px 10px rgba(0,0,0,0.12); min-width:180px; text-align:center; }

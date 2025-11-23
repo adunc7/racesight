@@ -1,0 +1,195 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard— Compare Drivers</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <link rel="stylesheet" href="/css/5-compare-drivers.css" />
+</head>
+<body>
+
+
+    <nav class="navbar" role="navigation" aria-label="Main">
+    <div class="nav-brand">Race Sight</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html" id="nav-home">Results</a>
+      <a class="nav-link" href="2-best-10-laps.html" id="nav-about">Best 10</a>
+      <a class="nav-link" href="3-driver-performance.html" id="nav-contact">Driver Endurance</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v1-display.html" id="nav-contact1">Dashboard - Display</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v2-grid.html" id="nav-contact2">Dashboard - Grid</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v3-graphs.html" id="nav-contact3">Dashboard - Graphs </a>
+      <a class="nav-link" href="5-compare-drivers.html" id="nav-contact4">Compare Drivers </a>
+      <a class="nav-link" href="5-compare-races-dashboard.html" id="nav-contact5">Compare Races </a>
+      <a class="nav-link" href="3D.html" id="nav-contact6">3D </a>
+
+    </div>
+  </nav>
+
+
+ <div id="weatherControls" style="margin:8px 0 12px 0; display:flex; gap:12px; align-items:center">
+    <label style="white-space:nowrap">Select Race Weather:
+      <input id="weather_url" type="text" placeholder="/Barber_Data_JSON/26_Weather_Race_1_Anonymized.json" value="/Barber_Data_JSON/26_Weather_Race_1_Anonymized.json" style="width:320px;margin-left:8px" />
+    </label>
+    <button id="weather_load">Load Weather</button>
+    <button id="weather_reset">Reset Weather</button>
+    <label style="white-space:nowrap">Lap:
+      <select id="lapSelect" style="margin-left:8px;min-width:140px"><option>All</option></select>
+    </label>
+    <label style="white-space:nowrap"><input id="linkPlayback" type="checkbox" style="margin-left:6px;" /> Link playback</label>
+    <span style="color:#666"></span>
+  </div>
+
+  
+
+  <div class="layout">
+    <div class="sideImage" style="grid-column:1/2">
+      <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:stretch;">
+        <img src="car_1.png" alt="Car 1" />
+        <div class="image-caption" id="A_json_name"></div>
+      </div>
+    </div>
+
+   
+
+    <div id="mainMapWrap"><div id="mainMap"></div></div>
+
+
+    
+  
+
+
+    <div class="weatherWrap" style="grid-column:2/3; grid-row:2/3">
+      <div id="weather_time" class="box" style="text-align:center">—</div>
+      <div id="weatherGrid" class="weatherGrid"></div>
+    </div>
+
+    <div class="sideImage" style="grid-column:3/4">
+      <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:stretch;">
+        <img src="car_2.png" alt="Car 2" />
+        <div class="image-caption" id="B_json_name"></div>
+      </div>
+    </div>
+
+  <div class="panelControls" style="grid-column:1/2; grid-row:2/3">
+      <button id="A_load">Load A</button>
+      <label>Time: <select id="A_timeField"><option value="meta_time">meta_time</option><option value="timestamp">timestamp</option><option value="time">time</option></select></label>
+      <label>Lat: <select id="A_lat"></select></label>
+      <label>Lon: <select id="A_lon"></select></label>
+      
+  <div class="playbar" style="margin-left:0; display:flex; flex-direction:column; align-items:flex-start">
+        <div class="playActions">
+          <button id="A_play">Play</button>
+          <button id="A_reset">Reset</button>
+          <label style="margin-left:8px;color:#fff;font-size:13px">Rate:
+            <select id="A_rate" style="margin-left:6px">
+              <option>0.25</option>
+              <option>0.5</option>
+              <option selected>1</option>
+              <option>2</option>
+              <option>4</option>
+            </select>
+          </label>
+        </div>
+        <div class="sliderRow" style="width:100%;display:flex;justify-content:flex-start;margin-top:8px">
+          <input id="A_slider" class="slider" type="range" min="0" max="0" value="0" style="width:260px"/>
+        </div>
+        <div id="A_time" class="timeDisplay">—</div>
+      </div>
+  </div>
+
+  <div class="panel" style="grid-column:1/2; grid-row:3/4">
+      <h3>Panel A</h3>
+      
+      <div id="A_grid" class="grid" aria-live="polite"></div>
+    </div>
+
+  <div id="mid_panel" class="panel" style="grid-column:2/3; grid-row:3/4">
+      <div class="mid-panel-content">
+        <div class="mid-caption"></div> <!---GR Cup-->
+      </div>
+  </div>
+
+  <div class="panelControls" style="grid-column:3/4; grid-row:2/3">
+      <button id="B_load">Load B</button>
+      <label>Time: <select id="B_timeField"><option value="meta_time">meta_time</option><option value="timestamp">timestamp</option><option value="time">time</option></select></label>
+      <label>Lat: <select id="B_lat"></select></label>
+      <label>Lon: <select id="B_lon"></select></label>
+  <div class="playbar" style="margin-left:0; display:flex; flex-direction:column; align-items:flex-start">
+        <div class="playActions">
+          <button id="B_play">Play</button>
+          <button id="B_reset">Reset</button>
+          <label style="margin-left:8px;color:#ffffff;font-size:13px">Rate:
+            <select id="B_rate" style="margin-left:6px">
+              <option>0.25</option>
+              <option>0.5</option>
+              <option selected>1</option>
+              <option>2</option>
+              <option>4</option>
+            </select>
+          </label>
+        </div>
+        <div class="sliderRow" style="width:100%;display:flex;justify-content:flex-start;margin-top:8px">
+          <input id="B_slider" class="slider" type="range" min="0" max="0" value="0" style="width:260px"/>
+        </div>
+        <div id="B_time" class="timeDisplay">—</div>
+      </div>
+  </div>
+
+  <div class="panel" style="grid-column:3/4; grid-row:3/4">
+      <h3>Panel B</h3>
+     
+      <div id="B_grid" class="grid" aria-live="polite"></div>
+    </div>
+  </div>
+
+
+  <!--Chart with Variables-->
+  <div id="chartFullWrap" style="margin-top:12px;border:1px solid #eee;background:#fff;border-radius:8px;padding:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div class="chart-title">Driver A &amp; Driver B — Selected variable vs time</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <label style="font-weight:700">Variable:</label>
+        <select id="chartVar" style="min-width:220px"></select>
+      </div>
+    </div>
+    <div id="chartA"></div>
+
+  </div>
+
+  <!--Weather Chart-->
+  <div id="chartWeatherWrap" style="margin-top:12px;border:1px solid #eee;background:#fff;border-radius:8px;padding:10px">
+    <div class="chart-title">Weather — variable vs time</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <label style="font-weight:700">Variable:</label>
+      <select id="weatherChartVar" style="min-width:220px">
+        <option value="AIR_TEMP">AIR_TEMP</option>
+        <option value="TRACK_TEMP">TRACK_TEMP</option>
+        <option value="HUMIDITY">HUMIDITY</option>
+        <option value="PRESSURE">PRESSURE</option>
+        <option value="WIND_SPEED">WIND_SPEED</option>
+        <option value="WIND_DIRECTION">WIND_DIRECTION</option>
+        <option value="RAIN">RAIN</option>
+      </select>
+    </div>
+    <div id="chartWeather" style="width:100%;height:200px"></div>
+  </div>
+
+
+
+
+
+  <script id="A_json" src="https://fulxwiizgkbyspqyluzc.supabase.co/storage/v1/object/sign/racingfiles/vehicle_5_test_laps_2_3_4.json?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83MDA1NzQ3OC1mMDg3LTRlZTktYTRhNy03M2QzNmNlNzYyNTgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJyYWNpbmdmaWxlcy92ZWhpY2xlXzVfdGVzdF9sYXBzXzJfM180Lmpzb24iLCJpYXQiOjE3NjM4NTE4MDgsImV4cCI6MTc2NjQ0MzgwOH0.MXWpuL7aRSh98n1bTXkHotWhjmSlpQ826RSny3JGaz0" type="application/json"></script>
+  <script id="B_json" src="https://fulxwiizgkbyspqyluzc.supabase.co/storage/v1/object/sign/racingfiles/vehicle_13_test_laps_2_3_4.json?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83MDA1NzQ3OC1mMDg3LTRlZTktYTRhNy03M2QzNmNlNzYyNTgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJyYWNpbmdmaWxlcy92ZWhpY2xlXzEzX3Rlc3RfbGFwc18yXzNfNC5qc29uIiwiaWF0IjoxNzYzODU0MjI2LCJleHAiOjE3NjY0NDYyMjZ9.kb2PsL0-IoVT9SPyoUuMQk-3llO7IC4n1s3OX8j8KEY" type="application/json"></script>
+  <script id="weather_json" src="/Barber_Data_JSON_UPDATED/26_Weather_Race 1_Anonymized.json" type="application/json"></script>
+
+<!--SCRIPT-->
+
+<script src="javascript/5-compare-drivers.js"> </script>
+
+</body>
+</html>

@@ -1,0 +1,95 @@
+ body { font-family: sans-serif; background: #ffffff; margin: 12px; } 
+
+    /* simple top nav */
+    .navbar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 20px 20px;
+      background: #222;
+      color: #fff;
+      border-radius: 6px;
+      margin-bottom: 14px;
+    }
+    .nav-brand { font-size: 20px; font-weight:700; letter-spacing: .4px; }
+    .nav-links { display:flex; gap:12px; margin-left: 12px; }
+    .nav-link {
+      color: #ddd;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 2px;
+      font-size: 14px;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.06); color: #eb0a1e; }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
+    }
+    select {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    /* layout: table + driver color box side-by-side */
+    #tableArea {
+      display: flex;
+      /* row-reverse keeps the existing HTML order but visually moves the box to the left */
+      flex-direction: row-reverse;
+      gap: 28px;
+      align-items: flex-start;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 0;
+      width: 560px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px 16px;
+      text-align: center;
+    }
+    th {
+      background-color: #e60303;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .driver-id {
+      font-weight: bold;
+      color: #e60303;
+    }
+
+    /* colored driver box - increased size and stronger visual */
+
+    .driver-box {
+      width: 240px;
+      min-height: 240px;
+       border-radius: 8px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       flex-direction: column;
+       color: #fff;
+       font-weight: 700;
+       box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+       border: 2px solid rgba(255,255,255,0.2);
+     }
+    .driver-box .label { font-size: 16px; opacity: 0.95; margin-bottom: 10px; }
+    .driver-box .num { font-size: 56px; line-height: 1; letter-spacing: 1px; }

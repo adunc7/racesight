@@ -1,0 +1,43 @@
+ body { font-family: sans-serif; background: #ffffff; margin: 12px; } 
+  
+ /* simple top nav */
+    .navbar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 20px 20px;
+      background: #000000;
+      color: #fff;
+      border-radius: 6px;
+      margin-bottom: 14px;
+    }
+    .nav-brand { font-size: 20px; font-weight:700; letter-spacing: .4px; }
+    .nav-links { display:flex; gap:12px; margin-left: 12px; }
+    .nav-link {
+      color: #ddd;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 2px;
+      font-size: 14px;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.06); color: #eb0a1e; }
+
+
+
+
+    .controls { display:flex; justify-content:center; align-items:center; margin-bottom:1rem; gap:1rem;}
+    table { border-collapse:collapse; width:100%; max-width:1100px; margin:0 auto; background:white; border-radius:8px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    th, td { border:1px solid #eee; padding:8px 12px; text-align:center; font-size:13px}
+    th { background:#e60303; color:#fff; font-weight:700 }
+    tr:nth-child(even){ background:#fafafa }
+    tr.selected { outline:3px solid rgba(30,120,200,0.12); background:linear-gradient(90deg, rgba(30,120,200,0.03), transparent) }
+    .driver-box { width:180px; min-height:120px; border-radius:8px; display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,0.12); border:2px solid rgba(255,255,255,0.12); margin:12px auto }
+    .driver-box .label{font-size:13px;opacity:.9}
+    .driver-box .num{font-size:44px}
+    #layout { display:flex; gap:20px; align-items:flex-start; justify-content:center; flex-wrap:wrap; margin-top:12px }
+    #tableWrap { flex:1 1 720px }
+    #side { width:220px; min-width:180px; display:flex; flex-direction:column; align-items:center }
+    #statsPanel { width:220px; background:#fff; border-radius:8px; padding:10px; box-shadow:0 4px 12px rgba(0,0,0,0.06); font-size:13px; color:#222 }
+    #statsPanel dt{ font-weight:700; margin-top:6px }
+    #statsPanel dd{ margin:0 0 8px 0 }
+    select { padding:6px 10px; border-radius:6px; border:1px solid #ccc }

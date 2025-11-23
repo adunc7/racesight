@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D3 Scatterplot - IM times (x) vs NUMBER (y) — driver selector</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+ <link rel="stylesheet" href="/css/3-driver-performance.css" />
+
+</head>
+<body>
+
+  <!-- navigation bar -->
+  
+  <nav class="navbar" role="navigation" aria-label="Main">
+    <div class="nav-brand">Race Sight</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html" id="nav-home">Results</a>
+      <a class="nav-link" href="2-best-10-laps.html" id="nav-about">Best 10</a>
+      <a class="nav-link" href="3-driver-performance.html" id="nav-contact">Driver Endurance</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v1-display.html" id="nav-contact1">Dashboard - Display</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v2-grid.html" id="nav-contact2">Dashboard - Grid</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v3-graphs.html" id="nav-contact3">Dashboard - Graphs </a>
+      <a class="nav-link" href="5-compare-drivers.html" id="nav-contact4">Compare Drivers </a>
+      <a class="nav-link" href="5-compare-races-dashboard.html" id="nav-contact5">Compare Races </a>
+      <a class="nav-link" href="3D.html" id="nav-contact6">3D </a>
+
+    </div>
+  </nav>
+
+
+  <h2>Location: Barber Motorsports Park- Race 1</h2>
+
+<!---Sector Times (x) vs Driver Number (y) — Select Drivers to Compare--->
+  <div id="controls">
+    <div class="controls-col">
+      <div>
+        <label for="lapSelect">Select Lap Number: </label>
+        <select id="lapSelect"><option value="__all">All</option></select>
+      </div>
+
+      <div>
+        <button id="selectAll" class="btn">Select all drivers</button>
+        <button id="clearAll" class="btn">Clear</button>
+      </div>
+
+      <div id="driverList" aria-label="Driver selector">
+        <div style="font-weight:600; margin-bottom:6px;">Drivers</div>
+      </div>
+
+      <!-- new axis selectors under driver list -->
+      <div id="axisSelectors" aria-label="Axis selectors">
+        <label for="xSelect">X axis variable</label>
+        <select id="xSelect"></select>
+
+        <label for="ySelect">Y axis variable</label>
+        <select id="ySelect"></select>
+      </div>
+    </div>
+
+    <div style="flex:1">
+      <div id="summary" style="margin-bottom:6px; color:#333"></div>
+      <div id="flagBox" style="display:inline-block;padding:6px 10px;border:1px solid #ffffff;border-radius:6px;background:#37eb0a;margin-bottom:8px;margin-right:8px">
+        <strong>FLAG AT FL:</strong>
+        <span id="flagAtFlVal">—</span>
+      </div>
+
+      <!-- plotWrapper now lays out svg and legend side-by-side -->
+      <div id="plotWrapper">
+        <svg id="plotSvg" width="100%" height="450"></svg>
+        <div id="legendContainer" aria-hidden="false"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <script src = "javascript/3-driver-performance.js"> </script>
+</body>
+</html>

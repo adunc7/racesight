@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driver 10 Best Laps</title>
+  <link rel="stylesheet" href="/css/2-best-10-laps.css" />
+    
+</head>
+<body>
+
+
+    <!-- navigation bar -->
+  
+  <nav class="navbar" role="navigation" aria-label="Main">
+    <div class="nav-brand">Race Sight</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html" id="nav-home">Results</a>
+      <a class="nav-link" href="2-best-10-laps.html" id="nav-about">Best 10</a>
+      <a class="nav-link" href="3-driver-performance.html" id="nav-contact">Driver Endurance</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v1-display.html" id="nav-contact1">Dashboard - Display</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v2-grid.html" id="nav-contact2">Dashboard - Grid</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v3-graphs.html" id="nav-contact3">Dashboard - Graphs </a>
+      <a class="nav-link" href="5-compare-drivers.html" id="nav-contact4">Compare Drivers </a>
+      <a class="nav-link" href="5-compare-races-dashboard.html" id="nav-contact5">Compare Races </a>
+      <a class="nav-link" href="3D.html" id="nav-contact6">3D </a>
+
+    </div>
+  </nav>
+
+
+  <div class="controls">
+    <label for="driverSelect">Select Driver:</label>
+    <select id="driverSelect">
+      <option value="">-- Select Driver --</option>
+    </select>
+  </div>
+
+  <!-- table + colored driver box container -->
+  <div id="tableArea">
+    <table id="lapTable" aria-label="Top 10 best laps">
+      <thead>
+        <tr id="tableHeader">
+          <th>Rank</th>
+          <th>Lap Time</th>
+          <th>Lap Number</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <!-- colored box showing selected driver number -->
+    <div id="driverBox" class="driver-box" aria-live="polite" aria-atomic="true" style="background:#888;">
+      <div class="label">Driver</div>
+      <div id="driverBoxNum" class="num">—</div>
+    </div>
+  </div>
+
+  <script src="javascript/2-best-10-lap.js"> </script>
+</body>
+</html>

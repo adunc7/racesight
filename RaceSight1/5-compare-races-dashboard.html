@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Race Compare — dual telemetry + weather</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="/css/5-compare-races.css">
+</head>
+<body>
+
+
+<!-- navigation bar -->
+   
+    <nav class="navbar" role="navigation" aria-label="Main">
+    <div class="nav-brand">Race Sight</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html" id="nav-home">Results</a>
+      <a class="nav-link" href="2-best-10-laps.html" id="nav-about">Best 10</a>
+      <a class="nav-link" href="3-driver-performance.html" id="nav-contact">Driver Endurance</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v1-display.html" id="nav-contact1">Dashboard - Display</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v2-grid.html" id="nav-contact2">Dashboard - Grid</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v3-graphs.html" id="nav-contact3">Dashboard - Graphs </a>
+      <a class="nav-link" href="5-compare-drivers.html" id="nav-contact4">Compare Drivers </a>
+      <a class="nav-link" href="5-compare-races-dashboard.html" id="nav-contact5">Compare Races </a>
+      <a class="nav-link" href="3D.html" id="nav-contact6">3D </a>
+
+    </div>
+  </nav>
+
+
+ <!-- Global telemetry variables grid (from dash.html) -->
+  <div style="margin:12px 0;">
+    <h3 style="margin:6px 0 8px 0"></h3>
+    <div id="globalGrid" class="grid" role="list" aria-label="All telemetry variables"></div>
+  </div>
+
+
+
+
+
+  <div id="linkControls">
+    <label><input type="checkbox" id="linkPlayback"> Link playback (Play/Pause + slider)</label>
+    <span style="color:#666"></span>
+
+    <!-- weather loader: separate inputs for panel A and panel B -->
+    <label style="margin-left:12px">Select Weather A:
+      <input id="weather_url_A" type="text" placeholder="Weather A" value="/Barber_Data_JSON_UPDATED/26_Weather_Race 1_Anonymized.json" style="width:260px"/>
+    </label>
+    <button id="weather_load_A">Load Weather A</button>
+    <label style="margin-left:8px">Select Weather B:
+      <input id="weather_url_B" type="text" placeholder="Weather B" value="/Barber_Data_JSON_UPDATED/26_Weather_Race 2_Anonymized.json" style="width:260px"/>
+    </label>
+    <button id="weather_load_B">Load Weather B</button>
+    <button id="weather_reset">Reset Weather</button>
+  </div>
+
+  <div class="compareWrap">
+    <div id="panelA" class="panel" data-side="A">
+      <h3>Race 1</h3>
+      <div class="topPanel">
+        <div class="topRow">
+          <div class="hero">1</div>
+          <div id="A_map" class="map"></div>
+        </div>
+      </div>
+
+      <div class="panelControls">
+        <div class="controls" role="group" aria-label="Controls A">
+          <input id="A_url" type="text" placeholder="vehicle_A.json" value = "https://fulxwiizgkbyspqyluzc.supabase.co/storage/v1/object/sign/racingfiles/vehicle_13_test_laps_2_3_4.json?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83MDA1NzQ3OC1mMDg3LTRlZTktYTRhNy03M2QzNmNlNzYyNTgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJyYWNpbmdmaWxlcy92ZWhpY2xlXzEzX3Rlc3RfbGFwc18yXzNfNC5qc29uIiwiaWF0IjoxNzYzOTMyNDcwLCJleHAiOjE3NjY1MjQ0NzB9.fRcJq62fyVQhdiS4VR5x8Wc8XqIAm_4MWbwZVE5xVYU"  style="width:260px"/>
+          <button id="A_load">Load</button>
+          <label>Time: <select id="A_timeField"><option value="meta_time">meta_time</option><option value="timestamp">timestamp</option></select></label>
+          <label>Lap: <select id="A_lap"><option>All</option></select></label>
+          <label>Lat: <select id="A_lat"></select></label>
+          <label>Lon: <select id="A_lon"></select></label>
+        </div>
+
+
+ 
+
+
+
+
+
+
+      <!-- replaced panel strip variables with full variable grid -->
+  <div class="panelStrip" id="A_panelStrip" aria-live="polite">
+        <div class="playbar">
+          <div class="playActions">
+            <button id="A_play">Play</button>
+            <button id="A_reset">Reset</button>
+            <label style="margin-left:8px;color:#fff;font-size:13px">Rate:
+              <select id="A_rate" style="margin-left:6px">
+                <option>0.25</option>
+                <option>0.5</option>
+                <option selected>1</option>
+                <option>2</option>
+                <option>4</option>
+              </select>
+            </label>
+          </div>
+          <div class="sliderRow" style="width:100%;display:flex;justify-content:flex-start;margin-top:8px">
+            <input id="A_slider" class="slider" type="range" min="0" max="0" value="0" style="width:260px"/>
+          </div>
+          <div id="A_status_time" class="timeDisplay">—</div>
+        </div>
+        <div id="A_grid" class="grid" role="list" aria-label="Telemetry variables A"></div>
+  </div>
+  </div>
+
+      <div id="A_weatherWrap">
+        <div style="margin-bottom:8px; display:flex; gap:8px; align-items:center">
+          <label>Weather rate: <select id="A_weatherRate"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option></select></label>
+        </div>
+        <div id="A_weatherGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+      </div>
+      <div id="A_status" style="margin-top:8px;color:#444"></div>
+    </div>
+
+
+    <!--PANEL STRIP B -->
+    <div id="panelB" class="panel" data-side="B">
+      <h3>Race 2</h3>
+      <div class="topPanel">
+        <div class="topRow">
+          <div class="hero">2</div>
+          <div id="B_map" class="map"></div>
+        </div>
+      </div>
+
+      <div class="panelControls">
+        <div class="controls" role="group" aria-label="Controls B">
+          <input id="B_url" type="text" placeholder="vehicle_B.json" value="https://fulxwiizgkbyspqyluzc.supabase.co/storage/v1/object/sign/racingfiles/vehicle_13_race2_laps_2_3_4.json?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83MDA1NzQ3OC1mMDg3LTRlZTktYTRhNy03M2QzNmNlNzYyNTgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJyYWNpbmdmaWxlcy92ZWhpY2xlXzEzX3JhY2UyX2xhcHNfMl8zXzQuanNvbiIsImlhdCI6MTc2MzkzMjM2MiwiZXhwIjoxNzY2NTI0MzYyfQ.KmTz5MkGEpu6IitX2OltupRnpo19XQa1jFqZvo4idrU" style="width:260px"/>
+          <button id="B_load">Load</button>
+          <label>Time: <select id="B_timeField"><option value="meta_time">meta_time</option><option value="timestamp">timestamp</option></select></label>
+          <label>Lap: <select id="B_lap"><option>All</option></select></label>
+          <label>Lat: <select id="B_lat"></select></label>
+          <label>Lon: <select id="B_lon"></select></label>
+        </div>
+
+  <div class="panelStrip" id="B_panelStrip" aria-live="polite">
+        <div class="playbar">
+          <div class="playActions">
+            <button id="B_play">Play</button>
+            <button id="B_reset">Reset</button>
+            <label style="margin-left:8px;color:#fff;font-size:13px">Rate:
+              <select id="B_rate" style="margin-left:6px">
+                <option>0.25</option>
+                <option>0.5</option>
+                <option selected>1</option>
+                <option>2</option>
+                <option>4</option>
+              </select>
+            </label>
+          </div>
+          <div class="sliderRow" style="width:100%;display:flex;justify-content:flex-start;margin-top:8px">
+            <input id="B_slider" class="slider" type="range" min="0" max="0" value="0" style="width:260px"/>
+          </div>
+          <div id="B_status_time" class="timeDisplay">—</div>
+        </div>
+        <div id="B_grid" class="grid" role="list" aria-label="Telemetry variables B"></div>
+  </div>
+  </div>
+
+      <div id="B_weatherWrap">
+        <div style="margin-bottom:8px; display:flex; gap:8px; align-items:center">
+          <label>Weather rate: <select id="B_weatherRate"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option></select></label>
+        </div>
+        <div id="B_weatherGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+      </div>
+      <div id="B_status" style="margin-top:8px;color:#444"></div>
+    </div>
+  </div>
+
+<script src = "javascript/5-compare-races.js"> </script>
+</body>
+</html>

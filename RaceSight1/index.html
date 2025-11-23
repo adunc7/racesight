@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Race Results</title>
+  <link rel="stylesheet" href="/css/1-race-results.css" />
+</head>
+<body>
+
+
+  <nav class="navbar" role="navigation" aria-label="Main">
+    <div class="nav-brand">Race Sight</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html" id="nav-home">Results</a>
+      <a class="nav-link" href="2-best-10-laps.html" id="nav-about">Best 10</a>
+      <a class="nav-link" href="3-driver-performance.html" id="nav-contact">Driver Endurance</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v1-display.html" id="nav-contact1">Dashboard - Display</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v2-grid.html" id="nav-contact2">Dashboard - Grid</a>
+      <a class="nav-link" href="4-dashboard-telemetry-v3-graphs.html" id="nav-contact3">Dashboard - Graphs </a>
+      <a class="nav-link" href="5-compare-drivers.html" id="nav-contact4">Compare Drivers </a>
+      <a class="nav-link" href="5-compare-races-dashboard.html" id="nav-contact5">Compare Races </a>
+      <a class="nav-link" href="3D.html" id="nav-contact6">3D </a>
+
+    </div>
+  </nav>
+
+  <div class="controls">
+    <label for="driverSelect">Select Driver:</label>
+    <select id="driverSelect"><option value="">— choose —</option></select>
+  </div>
+
+  <div id="layout">
+    <div id="tableWrap">
+      <table id="driversTable" aria-label="All drivers">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Driver</th>
+            <th>Position</th>
+            <th>Laps</th>
+            <th>Total time</th>
+            <th>Fastest lap</th>
+            <th>FL kph</th>
+            <th>Vehicle</th>
+            <th>Class</th>
+          </tr>
+        </thead>
+        <tbody id="driversBody"></tbody>
+      </table>
+    </div>
+
+    <div id="side">
+      <div id="driverBox" class="driver-box" style="background:#888">
+        <div class="label">Driver</div>
+        <div id="driverBoxNum" class="num">—</div>
+      </div>
+
+      <dl id="statsPanel" aria-live="polite" aria-atomic="true">
+        <dt>Position</dt><dd id="stat_POSITION">—</dd>
+        <dt>Laps</dt><dd id="stat_LAPS">—</dd>
+        <dt>Total Time</dt><dd id="stat_TOTAL_TIME">—</dd>
+        <dt>Fastest Lap</dt><dd id="stat_FL_TIME">—</dd>
+        <dt>Fastest Lap KPH</dt><dd id="stat_FL_KPH">—</dd>
+        <dt>Vehicle</dt><dd id="stat_VEHICLE">—</dd>
+        <dt>Class</dt><dd id="stat_CLASS">—</dd>
+      </dl>
+    </div>
+  </div>
+
+  <script src = "javascript/1-race-results.js"> </script>
+</body>
+</html>
